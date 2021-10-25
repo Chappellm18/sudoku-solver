@@ -18,7 +18,6 @@ public class solver {
         // Board is store as arraylist of objects
         // Object holds possibles and the final number
         System.out.println("Creating Board...");
-        tiles = createBoard();
         System.out.println("Setup...");
         System.out.println("Enter numbers in correct locations");
         System.out.println("Enter s to skip locations");
@@ -29,22 +28,30 @@ public class solver {
         tiles = runPoss(tiles);
         for (int i = 0; i < 9; i++) {
             for (int k = 0; k < 9; k++) {
-                for (int h = 0; h < tiles[i][k].poss.size(); h++) {
-                    System.out.print(tiles[i][k].poss.get(h) + "|");
+                if (tiles[i][k].poss == null) {
+                    // do nothing
+                } else {
+                    for (int h = 0; h < tiles[i][k].poss.size(); h++) {
+                        System.out.print(tiles[i][k].poss.get(h) + "|");
+                    }
+                    System.out.println();
+                    System.out.println(tiles[i][k].finalNum + " <- final");
                 }
-                System.out.println();
-                System.out.println(tiles[i][k].finalNum + " <- final");
+
             }
         }
 
         printGame(tiles);
     }
 
-    public static location[][] createBoard() {
-        location[][] temp = new location[9][9];
+    public static location[][] finishBoard(location[][] temp) {
+
         for (int i = 0; i < 9; i++) {
             for (int k = 0; k < 9; k++) {
-                temp[i][k] = new location();
+                if (temp[i][k] == null) {
+                    temp[i][k] = new location();
+                }
+
             }
         }
         return temp;
@@ -54,16 +61,22 @@ public class solver {
 
         for (int row = 0; row < temp.length; row++) {
             for (int col = 0; col < temp[0].length; col++) {
-                for (int i = 0; i < 9; i++) {
-                    if (!searchUpDown(col, i, temp)) {
-                        // System.out.println("Searched up down");
-                        if (!searchLeftRight(row, i, temp)) {
-                            // System.out.println("Searched left right");
+                for (int i = 1; i <= 9; i++) {
+                    if (temp[row][col].finalNum != 0) {
+                        System.out.println("Already has final number" + temp[row][col].finalNum);
+                    } else if (temp[row][col].finalNum == 0) {
+                        if (!searchUpDown(col, i, temp)) {
+                            // System.out.println("Searched up down");
+                            if (!searchLeftRight(row, i, temp)) {
+                                // System.out.println("Searched left right");
 
-                            if (!searchBox(row, col, i, temp)) {
-                                // System.out.println("Searched box - value added to poss");
+                                if (!searchBox(row, col, i, temp)) {
+                                    // System.out.println("Searched box - value added to poss");
 
-                                temp[row][col].poss.add(i + 1);
+                                    temp[row][col].poss.add(i);
+                                } else {
+                                    System.out.println(i + "value not used in row:" + row + " col:" + col);
+                                }
                             } else {
                                 System.out.println(i + "value not used in row:" + row + " col:" + col);
                             }
@@ -71,8 +84,9 @@ public class solver {
                             System.out.println(i + "value not used in row:" + row + " col:" + col);
                         }
                     } else {
-                        System.out.println(i + "value not used in row:" + row + " col:" + col);
+                        System.out.println("UHHHHHHH");
                     }
+
                 }
             }
         }
@@ -103,6 +117,10 @@ public class solver {
     }
 
     public static boolean searchBox(int row, int col, int value, location[][] temp) {
+        for (int i = 1; i <= 9; i++) {
+
+            i++;
+        }
         return false;
     }
 
@@ -123,12 +141,14 @@ public class solver {
                 String tmp = console.next();
                 if (tmp.equalsIgnoreCase("s")) {
                     System.out.println("Skipped this one");
+                    temp[i][h] = new location();
                 } else if (tmp.equalsIgnoreCase("done")) {
-                    console.close();
+
                     System.out.println("Done with input");
-                    return temp;
-                } else if (isNumeric(tmp)) {
-                    temp[i][h].finalNum = Integer.parseInt(tmp);
+                    console.close();
+                    return finishBoard(temp);
+                } else if (isNumeric(tmp) && (Integer.parseInt(tmp) < 10) && (Integer.parseInt(tmp) > 0)) {
+                    temp[i][h] = new location(Integer.parseInt(tmp));
                 } else {
                     System.out.println("UNKNOWN INPUT -> Skipped this one");
                 }
@@ -155,6 +175,7 @@ class location {
 
     ArrayList<Integer> poss;
     int finalNum;
+    char area;
 
     public location() {
         poss = new ArrayList<Integer>();
@@ -163,7 +184,6 @@ class location {
 
     public location(int x) {
         finalNum = x;
-        poss = null;
     }
 
 }
