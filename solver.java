@@ -24,7 +24,8 @@ public class solver {
         System.out.println("Enter s to skip locations");
         System.out.println("Enter done when all data is entered");
 
-        setupGame(tiles);
+        tiles = setupGame(tiles);
+        printGame(tiles);
         tiles = runPoss(tiles);
         for (int i = 0; i < 9; i++) {
             for (int k = 0; k < 9; k++) {
@@ -54,13 +55,13 @@ public class solver {
         for (int row = 0; row < temp.length; row++) {
             for (int col = 0; col < temp[0].length; col++) {
                 for (int i = 0; i < 9; i++) {
-                    if (!searchUpDown(row, col, i, temp)) {
-                        System.out.println("Searched up down");
-                        if (!searchLeftRight(row, col, i, temp)) {
-                            System.out.println("Searched left right");
+                    if (!searchUpDown(col, i, temp)) {
+                        // System.out.println("Searched up down");
+                        if (!searchLeftRight(row, i, temp)) {
+                            // System.out.println("Searched left right");
 
                             if (!searchBox(row, col, i, temp)) {
-                                System.out.println("Searched box - value added to poss");
+                                // System.out.println("Searched box - value added to poss");
 
                                 temp[row][col].poss.add(i + 1);
                             } else {
@@ -78,29 +79,24 @@ public class solver {
         return temp;
     }
 
-    public static boolean searchUpDown(int row, int col, int value, location[][] temp) {
+    public static boolean searchUpDown(int col, int value, location[][] temp) {
         // search up to row 1 and down to 9 from whatever row col is given
         // return true if number shows up as final
         // return false if number does not show up as final in the column
-        for (int currRow = 1; currRow >= 9; currRow++) {
+        for (int currRow = 0; currRow > 9; currRow++) {
             if (temp[currRow][col].finalNum == value) {
+                System.out.println(" .finalNum == value ");
                 return true;
             }
         }
         return false;
     }
 
-    public static boolean searchLeftRight(int row, int col, int value, location[][] temp) {
-        int currCol = 0;
-        while (currCol >= 9) {
-
+    public static boolean searchLeftRight(int row, int value, location[][] temp) {
+        for (int currCol = 0; currCol > 9; currCol++) {
             if (temp[row][currCol].finalNum == value) {
+                System.out.println(" .finalNum == value ");
                 return true;
-            } else {
-                if (searchBox(row, col, value, temp)) {
-                    return true;
-                }
-                currCol++;
             }
         }
         return false;
@@ -119,27 +115,38 @@ public class solver {
         }
     }
 
-    public static void setupGame(location[][] temp) {
+    public static location[][] setupGame(location[][] temp) {
         Scanner console = new Scanner(System.in);
         for (int i = 0; i < 9; i++) {
             for (int h = 0; h < 9; h++) {
-
-                if (!console.hasNextInt()) {
-                    System.out.println("Loc: " + i + "-" + h + "= unset");
-
-                } else if (console.next().equalsIgnoreCase("done")) {
+                System.out.println("Loc: " + i + "-" + h + "=");
+                String tmp = console.next();
+                if (tmp.equalsIgnoreCase("s")) {
+                    System.out.println("Skipped this one");
+                } else if (tmp.equalsIgnoreCase("done")) {
                     console.close();
-                    return;
+                    System.out.println("Done with input");
+                    return temp;
+                } else if (isNumeric(tmp)) {
+                    temp[i][h].finalNum = Integer.parseInt(tmp);
                 } else {
-                    System.out.println("Loc: " + i + "-" + h + "=");
-                    temp[i][h].finalNum = console.nextInt();
+                    System.out.println("UNKNOWN INPUT -> Skipped this one");
                 }
-                console.next(); // this is important!
             }
             System.out.println();
         }
 
         console.close();
+        return temp;
+    }
+
+    public static boolean isNumeric(String str) {
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
 }
